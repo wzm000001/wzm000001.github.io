@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Topic Inbox 静态阅读</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f7f5ef;
+      --surface: #fffdf8;
+      --surface-muted: #ece8dc;
+      --text: #20231f;
+      --muted: #687064;
+      --line: #d9d2c2;
+      --accent: #246b55;
+      --accent-strong: #174637;
+      --quote: #7b4d2f;
+      --focus: #c77f34;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    a {
+      color: var(--accent-strong);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(250px, 320px) minmax(0, 1fr);
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: #efebe0;
+      padding: 24px 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+
+    .brand {
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .brand h2,
+    .topic-title h1 {
+      margin: 0;
+      line-height: 1.15;
+    }
+
+    .brand p,
+    .topic-title p,
+    .empty-state p {
+      margin: 8px 0 0;
+      color: var(--muted);
+    }
+
+    .topic-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .topic-button {
+      width: 100%;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text);
+      padding: 10px 12px;
+      text-align: left;
+    }
+
+    .topic-button:hover,
+    .topic-button.active {
+      border-color: var(--line);
+      background: var(--surface);
+    }
+
+    .topic-button strong {
+      display: block;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .topic-button span {
+      color: var(--muted);
+      display: block;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .main {
+      min-width: 0;
+      padding: 28px clamp(18px, 5vw, 64px) 64px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: end;
+      justify-content: space-between;
+      margin: 24px 0;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .search-field {
+      flex: 1 1 260px;
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .search-field input,
+    .filter-select {
+      width: 100%;
+      min-height: 42px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--text);
+      padding: 8px 10px;
+    }
+
+    .filter-field {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 7px 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stat strong {
+      color: var(--text);
+    }
+
+    .reading-document {
+      max-width: 980px;
+    }
+
+    .source-section {
+      border-top: 1px solid var(--line);
+      padding: 28px 0;
+    }
+
+    .source-heading {
+      margin-bottom: 18px;
+    }
+
+    .source-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .adapter {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-muted);
+      color: var(--accent-strong);
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .source-title-row {
+      display: flex;
+      gap: 12px;
+      align-items: start;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    .source-title-row h3 {
+      margin: 0;
+      font-size: clamp(20px, 2.5vw, 30px);
+      line-height: 1.2;
+    }
+
+    .open-source {
+      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--accent-strong);
+      padding: 6px 10px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .source-summary {
+      color: var(--muted);
+      margin: 12px 0 0;
+    }
+
+    .reading-entry-list {
+      display: grid;
+      gap: 16px;
+    }
+
+    .reading-entry {
+      display: grid;
+      gap: 10px;
+    }
+
+    .quote-strip,
+    .standalone-hint,
+    .note-block {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    .quote-strip {
+      border-left: 4px solid var(--quote);
+      padding: 14px 16px;
+    }
+
+    .quote-strip blockquote {
+      margin: 8px 0;
+      white-space: pre-wrap;
+      color: #2e2f2b;
+    }
+
+    .entry-number,
+    .quote-strip small,
+    .standalone-hint small,
+    .note-label span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .entry-number {
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .standalone-hint {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      color: var(--accent-strong);
+      background: #edf3ed;
+    }
+
+    .note-block {
+      padding: 14px 16px;
+    }
+
+    .note-label {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .note-rich-text p {
+      margin: 0 0 8px;
+    }
+
+    .note-rich-text ul,
+    .note-rich-text ol {
+      margin-top: 8px;
+      padding-left: 24px;
+    }
+
+    .empty-note,
+    .filtered-note,
+    .empty-state {
+      color: var(--muted);
+    }
+
+    .filtered-note,
+    .empty-state {
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      padding: 24px;
+      background: var(--surface);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 840px) {
+      .app-shell {
+        display: block;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .topic-list {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+
+      .main {
+        padding: 22px 16px 48px;
+      }
+
+      .source-title-row {
+        display: grid;
+      }
+
+      .open-source {
+        justify-self: start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <p class="eyebrow">Topic Inbox</p>
+        <h2>静态阅读</h2>
+        <p>正在加载导出的阅读内容。</p>
+      </div>
+    </aside>
+    <main class="main">
+      <section class="empty-state">
+        <p class="eyebrow">LOADING</p>
+        <h1>Topic Inbox 静态阅读</h1>
+        <p>如果页面一直停在这里，请确认 assets/topic-inbox-static.js 已一起上传。</p>
+      </section>
+    </main>
+  </div>
+  <script src="assets/topic-inbox-static.js" defer></script>
+</body>
+</html>
