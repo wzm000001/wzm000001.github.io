@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Topic Inbox">
+  <rect width="128" height="128" rx="24" fill="#071713"/>
+  <path d="M35 24h36l22 22v35H35V24Z" fill="#f6f0df"/>
+  <path d="M70 24v24h23" fill="#d9e7cf"/>
+  <path d="M28 74h28l7 12h10l7-12h20v22c0 8.8-7.2 16-16 16H44c-8.8 0-16-7.2-16-16V74Z" fill="#103c31"/>
+  <path d="M38 86h20l6 10h11l6-10h17" fill="none" stroke="#f6f0df" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="43" cy="42" r="7" fill="#74c69d"/>
+  <circle cx="59" cy="58" r="5.5" fill="#74c69d"/>
+  <circle cx="80" cy="62" r="6" fill="#74c69d"/>
+  <path d="M48 47l7 7m10 3l9 3" fill="none" stroke="#103c31" stroke-width="5" stroke-linecap="round"/>
+</svg>
